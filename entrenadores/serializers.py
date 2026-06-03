@@ -55,57 +55,23 @@ class EntrenadorRegisterSerializer(serializers.ModelSerializer):
 
 
 class RutinaSerializer(serializers.ModelSerializer):
-    entrenador_nombre = serializers.CharField(
-        source='entrenador.get_full_name', 
-        read_only=True
-    )
+    entrenador_nombre = serializers.CharField(source='entrenador.get_full_name', read_only=True)
     
     class Meta:
         model = Rutina
-        fields = [
-            'id', 'nombre', 'duracion', 'nivel', 'descripcion',
-            'imagen', 'entrenador', 'entrenador_nombre',
-            'fecha_creacion', 'fecha_actualizacion'
-        ]
-        read_only_fields = ['fecha_creacion', 'fecha_actualizacion', 'entrenador']
+        fields = ['id', 'nombre', 'descripcion', 'duracion', 'nivel', 
+                  'imagen', 'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
+        read_only_fields = ['entrenador']
+        extra_kwargs = {
+            'imagen': {'required': False}  # ✅ Imagen NO requerida
+        }
     
     def validate_imagen(self, value):
-        """Validar imagen solo si se proporciona una nueva"""
+        """Validar imagen - permitir None"""
+        if value is None:
+            return None
         if value:
-            # Validar tamaño (5MB max)
-            max_size = 5 * 1024 * 1024
+            max_size = 5 * 1024 * 1024  # 5MB
             if value.size > max_size:
-                raise serializers.ValidationError(
-                    "La imagen no puede superar 5MB"
-                )
-            
-            # Validar tipo
-            allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
-            if value.content_type not in allowed_types:
-                raise serializers.ValidationError(
-                    "Solo se permiten imágenes JPG, PNG o WebP"
-                )
-        
+                raise serializers.ValidationError("La imagen no puede superar 5MB")
         return value
-    
-    def update(self, instance, validated_data):
-        """
-        Actualizar instancia manteniendo la imagen anterior si no se proporciona una nueva
-        """
-        print("=== UPDATE SERIALIZER ===")
-        print("Instance:", instance)
-        print("Validated data:", validated_data)
-        
-        # Si no se envía imagen, mantener la existente
-        if 'imagen' not in validated_data or validated_data.get('imagen') is None:
-            # Remover imagen del validated_data si es None
-            validated_data.pop('imagen', None)
-            print("Manteniendo imagen existente:", instance.imagen)
-        
-        # Actualizar campos
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        
-        instance.save()
-        print("Rutina actualizada:", instance)
-        return instance

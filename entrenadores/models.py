@@ -37,7 +37,7 @@ class Rutina(models.Model):
     duracion = models.IntegerField(help_text="Duración en minutos")
     nivel = models.CharField(max_length=20, choices=NIVEL_CHOICES)
     descripcion = models.TextField(blank=True, null=True)
-    imagen = models.ImageField(upload_to='rutinas/')
+    imagen = models.ImageField(upload_to='rutinas/', null=True, blank=True)
     entrenador = models.ForeignKey(
         Entrenador, 
         on_delete=models.CASCADE, 
