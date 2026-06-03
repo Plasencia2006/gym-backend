@@ -45,20 +45,21 @@ class Rutina(models.Model):
         ('Intermedio', 'Intermedio'),
         ('Avanzado', 'Avanzado'),
     ])
+    
+    # ✅ ESTO DEBE ESTAR ASÍ:
     imagen = models.ImageField(
         upload_to='rutinas/',
-        null=True,        # ← ESTO
-        blank=True,       # ← ESTO
+        null=True,        # ← IMPORTANTE
+        blank=True,       # ← IMPORTANTE
     )
+    
     entrenador = models.ForeignKey(
         'entrenadores.Entrenador',
         on_delete=models.CASCADE,
-        related_name='rutinas',
-        null=True,  # ← AGREGAR ESTO
-        blank=True  # ← AGREGAR ESTO
+        related_name='rutinas'
     )
-    fecha_creacion = models.DateTimeField(auto_now_add=True)  # ← CAMBIAR
-    fecha_actualizacion = models.DateTimeField(auto_now=True)  # ← CAMBIAR
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = 'Rutina'

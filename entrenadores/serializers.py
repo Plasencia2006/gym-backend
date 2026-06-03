@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import Entrenador, Rutina
+from rest_framework import serializers
+from .models import Rutina
 
 
 class EntrenadorSerializer(serializers.ModelSerializer):
@@ -62,7 +64,16 @@ class RutinaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre', 'descripcion', 'duracion', 'nivel', 
                   'imagen', 'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
         read_only_fields = ['entrenador']
+        
+        # ✅ HACER IMAGEN OPCIONAL
+        extra_kwargs = {
+            'imagen': {
+                'required': False,    # ← NO requerida
+                'allow_null': True,   # ← Permitir NULL
+                'allow_blank': True   # ← Permitir vacío
+            }
+        }
     
     def create(self, validated_data):
-        # Si no hay imagen, crear sin ella
+        # Si no hay imagen, validated_data['imagen'] será None
         return Rutina.objects.create(**validated_data)
