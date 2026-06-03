@@ -154,17 +154,9 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
         secure=True
     )
     
-    # ✅ Django 5.0+ usa STORAGES en lugar de DEFAULT_FILE_STORAGE
-    STORAGES = {
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-        },
-    }
-    
-    MEDIA_URL = '/media/'
+    # ✅ Usar DEFAULT_FILE_STORAGE (compatible con Django 5.0)
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    MEDIA_URL = 'media/'
     
     print("✅ Cloudinary configurado correctamente")
 else:
