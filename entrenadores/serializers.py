@@ -62,15 +62,15 @@ class RutinaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rutina
         fields = ['id', 'nombre', 'descripcion', 'duracion', 'nivel', 
-                  'imagen', 'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
+                  'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
         read_only_fields = ['entrenador']
         
         # ✅ HACER IMAGEN OPCIONAL
         extra_kwargs = {
             'imagen': {
-                'required': False,    # ← NO requerida
-                'allow_null': True,   # ← Permitir NULL
-                'allow_blank': True   # ← Permitir vacío
+                'required': False,
+                'allow_null': True,
+                'allow_blank': True
             }
         }
     

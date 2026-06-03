@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-import os
+
 
 class Entrenador(AbstractUser):
     """Modelo de usuario personalizado para entrenadores"""
@@ -12,17 +12,16 @@ class Entrenador(AbstractUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
     
-    # ✅ AGREGAR ESTO para evitar conflictos
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='entrenador_groups',  # ← CAMBIAR related_name
+        related_name='entrenador_groups',
         blank=True,
         verbose_name='groups',
         help_text='The groups this user belongs to.',
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='entrenador_permissions',  # ← CAMBIAR related_name
+        related_name='entrenador_permissions',
         blank=True,
         verbose_name='user permissions',
         help_text='Specific permissions for this user.',
@@ -46,12 +45,7 @@ class Rutina(models.Model):
         ('Avanzado', 'Avanzado'),
     ])
     
-    # ✅ ESTO DEBE ESTAR ASÍ:
-    imagen = models.ImageField(
-        upload_to='rutinas/',
-        null=True,        # ← IMPORTANTE
-        blank=True,       # ← IMPORTANTE
-    )
+    # ❌ ELIMINADO: campo imagen
     
     entrenador = models.ForeignKey(
         'entrenadores.Entrenador',
