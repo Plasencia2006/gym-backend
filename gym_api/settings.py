@@ -3,19 +3,20 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ✅ PyMySQL como reemplazo de MySQLdb
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    pass
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-local-key-change-in-production')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Detectar si estamos en Vercel
 IS_VERCEL = os.environ.get('VERCEL') == '1'
 
-# ALLOWED_HOSTS
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -23,12 +24,10 @@ ALLOWED_HOSTS = [
     '.now.sh',
 ]
 
-# Agregar VERCEL_URL dinámicamente si existe
 VERCEL_URL = os.environ.get('VERCEL_URL')
 if VERCEL_URL and VERCEL_URL not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(VERCEL_URL)
 
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,24 +38,15 @@ INSTALLED_APPS = [
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
-        # Cloudinary
+    'corsheaders',
+    # Cloudinary
     'cloudinary',
     'cloudinary_storage',
-    
-    'corsheaders',
     # Local
     'entrenadores',
 ]
 
-# Agregar Cloudinary si está configurado en las variables de entorno
-if os.environ.get('CLOUDINARY_CLOUD_NAME'):
-    INSTALLED_APPS += [
-        'cloudinary',
-        'cloudinary_storage',
-    ]
-
 MIDDLEWARE = [
-    # ⚠️ CORS DEBE IR PRIMERO
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -89,11 +79,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gym_api.wsgi.application'
 
 # ============================================================================
-# BASE DE DATOS - MySQL local / Neon (PostgreSQL) en Vercel/Producción
+# BASE DE DATOS
 # ============================================================================
-
 if IS_VERCEL or config('USE_NEON', default=False, cast=bool):
-    # En Vercel o con USE_NEON activo se usa PostgreSQL de Neon
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -102,13 +90,10 @@ if IS_VERCEL or config('USE_NEON', default=False, cast=bool):
             'PASSWORD': os.environ.get('NEON_DATABASE_PASSWORD') or config('NEON_DATABASE_PASSWORD'),
             'HOST': os.environ.get('NEON_DATABASE_HOST') or config('NEON_DATABASE_HOST'),
             'PORT': os.environ.get('NEON_DATABASE_PORT', default='5432'),
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
+            'OPTIONS': {'sslmode': 'require'},
         }
     }
 else:
-    # Por defecto usar MySQL local
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -123,20 +108,12 @@ else:
         }
     }
 
-# ============================================================================
-# VALIDACIÓN DE CONTRASEÑAS
-# ============================================================================
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
-# ============================================================================
-# INTERNACIONALIZACIÓN
-# ============================================================================
 
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'UTC'
@@ -146,23 +123,19 @@ USE_TZ = True
 # ============================================================================
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # ============================================================================
-
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# WhiteNoise para servir archivos estáticos en producción
 if IS_VERCEL:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (imágenes)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # ============================================================================
-# CLOUDINARY - Configuración para imágenes en producción
+# CLOUDINARY
 # ============================================================================
 CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
@@ -181,21 +154,13 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
     )
     
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    print("✅ Cloudinary configurado correctamente")
-
-# ============================================================================
-# CONFIGURACIÓN DE DJANGO
-# ============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# ⚠️ MODELO DE USUARIO PERSONALIZADO
 AUTH_USER_MODEL = 'entrenadores.Entrenador'
 
 # ============================================================================
-# REST FRAMEWORK - CONFIGURACIÓN COMPLETA
+# REST FRAMEWORK
 # ============================================================================
-
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -219,7 +184,6 @@ REST_FRAMEWORK = {
 # ============================================================================
 # JWT SETTINGS
 # ============================================================================
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -231,9 +195,8 @@ SIMPLE_JWT = {
 }
 
 # ============================================================================
-# CORS - CONFIGURACIÓN
+# CORS
 # ============================================================================
-
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
@@ -258,15 +221,11 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# Configuración dinámica de orígenes según el entorno
 FRONTEND_URL = os.environ.get('FRONTEND_URL') or config('FRONTEND_URL', default='')
 
 if IS_VERCEL:
-    # ✅ En Vercel, permitir todos los orígenes temporalmente para pruebas
     CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOWED_ORIGINS = []
-    
-    # Si FRONTEND_URL está definido, agregarlo explícitamente
     if FRONTEND_URL:
         CORS_ALLOWED_ORIGINS = [FRONTEND_URL]
         CORS_ALLOW_ALL_ORIGINS = False
@@ -275,66 +234,42 @@ elif DEBUG:
     CORS_ALLOWED_ORIGINS = []
 else:
     CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = [
-        'http://localhost:5173',
-        'http://localhost:3000',
-    ]
+    CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'http://localhost:3000']
     if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
         CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
 # ============================================================================
-# CSRF - CONFIGURACIÓN
+# CSRF
 # ============================================================================
-
 if IS_VERCEL:
-    # ✅ En Vercel, permitir todos los orígenes de Vercel
-    CSRF_TRUSTED_ORIGINS = [
-        'https://*.vercel.app',
-        'https://gym-backend-indol.vercel.app',  # Tu URL específica
-    ]
-    if FRONTEND_URL:
-        if FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
-            CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
+    CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://gym-backend-indol.vercel.app']
+    if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 else:
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://*.vercel.app',
-    ]
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:5173', 'http://localhost:3000', 'https://*.vercel.app']
     if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
 # ============================================================================
 # SEGURIDAD - PRODUCCIÓN
 # ============================================================================
-
 if not DEBUG or IS_VERCEL:
-    # SSL/HTTPS
-    SECURE_SSL_REDIRECT = False  # Vercel maneja esto automáticamente por detrás
+    SECURE_SSL_REDIRECT = False
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
-    # Cookies seguras
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    
-    # Security headers
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    
-    # Otros
     X_FRAME_OPTIONS = 'DENY'
     
-    # Logging
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
         'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-            },
+            'console': {'class': 'logging.StreamHandler'},
         },
         'root': {
             'handlers': ['console'],
@@ -348,34 +283,3 @@ if not DEBUG or IS_VERCEL:
             },
         },
     }
-    
-# ============================================================================
-# CONFIGURACIÓN ESPECÍFICA PARA VERCEL
-# ============================================================================
-
-if IS_VERCEL:
-    # Forzar que Django sepa que está en Vercel
-    ALLOWED_HOSTS += ['gym-backend-indol.vercel.app']
-    
-    # Logging para debug
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'root': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-        'loggers': {
-            'django': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': False,
-            },
-        },
-    }
-    
