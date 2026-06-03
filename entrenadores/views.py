@@ -14,7 +14,7 @@ from .serializers import (
 )
 
 
-class IsTrainer(BasePermission):  # ✅ CORREGIDO: BasePermission viene de permissions
+class IsTrainer(BasePermission):
     """Permiso personalizado solo para entrenadores"""
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.is_trainer
@@ -26,12 +26,6 @@ class RegisterView(APIView):
     parser_classes = [JSONParser, FormParser, MultiPartParser]
     
     def post(self, request):
-        print("=" * 50)
-        print("REGISTER VIEW - Request received")
-        print("Content-Type:", request.content_type)
-        print("Data:", request.data)
-        print("=" * 50)
-        
         serializer = EntrenadorRegisterSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -44,7 +38,6 @@ class RegisterView(APIView):
                 'access': str(refresh.access_token),
             }, status=status.HTTP_201_CREATED)
         
-        print("Validation errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -54,12 +47,6 @@ class LoginView(APIView):
     parser_classes = [JSONParser, FormParser, MultiPartParser]
     
     def post(self, request):
-        print("=" * 50)
-        print("LOGIN VIEW - Request received")
-        print("Content-Type:", request.content_type)
-        print("Data:", request.data)
-        print("=" * 50)
-        
         username = request.data.get('username')
         password = request.data.get('password')
         
@@ -107,31 +94,15 @@ class RutinaViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Crear rutina asignando el entrenador actual"""
-        try:
-            print("CREANDO RUTINA")
-            print("User:", self.request.user)
-            serializer.save(entrenador=self.request.user)
-        except Exception as e:
-            print("ERROR al crear:", str(e))
-            raise
+        serializer.save(entrenador=self.request.user)
     
     def perform_update(self, serializer):
-        """Actualizar rutina - SOLO actualizar campos enviados"""
-        try:
-            print("ACTUALIZANDO RUTINA")
-            print("User:", self.request.user)
-            print("Data:", self.request.data)
-            print("Files:", self.request.FILES)
-            
-            # Guardar sin tocar el entrenador (se mantiene el original)
-            serializer.save()
-        except Exception as e:
-            print("ERROR al actualizar:", str(e))
-            raise
+        """Actualizar rutina"""
+        serializer.save()
     
     def update(self, request, *args, **kwargs):
         """Override del update para manejar mejor los datos"""
-        partial = kwargs.pop('partial', True)  # Permitir actualización parcial
+        partial = kwargs.pop('partial', True)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         
@@ -140,7 +111,6 @@ class RutinaViewSet(viewsets.ModelViewSet):
             self.perform_update(serializer)
             return Response(serializer.data)
         except Exception as e:
-            print("ERROR en update:", str(e))
             return Response(
                 {'error': str(e), 'detail': serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST

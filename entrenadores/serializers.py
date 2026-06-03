@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import Entrenador, Rutina
-from rest_framework import serializers
-from .models import Rutina
 
 
 class EntrenadorSerializer(serializers.ModelSerializer):
@@ -47,7 +45,6 @@ class EntrenadorRegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         password = validated_data.pop('password')
         
-        # Crear el usuario con create_user para que encripte la contraseña
         entrenador = Entrenador.objects.create_user(
             password=password,
             is_trainer=True,

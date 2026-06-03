@@ -3,7 +3,7 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 
-# ✅ PyMySQL como reemplazo de MySQLdb
+# PyMySQL como reemplazo de MySQLdb
 try:
     import pymysql
     pymysql.install_as_MySQLdb()
@@ -17,9 +17,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 IS_VERCEL = os.environ.get('VERCEL') == '1'
 
-# ============================================================================
 # CONFIGURACIÓN BÁSICA
-# ============================================================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'entrenadores.Entrenador'
 
@@ -34,9 +32,7 @@ VERCEL_URL = os.environ.get('VERCEL_URL')
 if VERCEL_URL and VERCEL_URL not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(VERCEL_URL)
 
-# ============================================================================
 # APLICACIONES INSTALADAS
-# ============================================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -84,9 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gym_api.wsgi.application'
 
-# ============================================================================
 # BASE DE DATOS
-# ============================================================================
 if IS_VERCEL or config('USE_NEON', default=False, cast=bool):
     DATABASES = {
         'default': {
@@ -121,17 +115,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ============================================================================
 # INTERNACIONALIZACIÓN
-# ============================================================================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = False
 USE_TZ = True
 
-# ============================================================================
 # ARCHIVOS ESTÁTICOS
-# ============================================================================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -143,9 +133,7 @@ else:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ============================================================================
 # REST FRAMEWORK
-# ============================================================================
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -166,9 +154,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-# ============================================================================
 # JWT SETTINGS
-# ============================================================================
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -179,9 +165,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# ============================================================================
 # CORS
-# ============================================================================
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
@@ -223,9 +207,7 @@ else:
     if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
         CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
-# ============================================================================
 # CSRF
-# ============================================================================
 if IS_VERCEL:
     CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://gym-backend-indol.vercel.app']
     if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
@@ -235,9 +217,7 @@ else:
     if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
-# ============================================================================
 # SEGURIDAD - PRODUCCIÓN
-# ============================================================================
 if not DEBUG or IS_VERCEL:
     SECURE_SSL_REDIRECT = False
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -8,6 +8,8 @@ class Entrenador(AbstractUser):
     especialidad = models.CharField(max_length=100, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     foto = models.ImageField(upload_to='entrenadores/', blank=True, null=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    is_trainer = models.BooleanField(default=True)
     
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
@@ -44,7 +46,6 @@ class Rutina(models.Model):
         ('Intermedio', 'Intermedio'),
         ('Avanzado', 'Avanzado'),
     ])
-    # ❌ SIN campo imagen
     
     entrenador = models.ForeignKey(
         'entrenadores.Entrenador',
