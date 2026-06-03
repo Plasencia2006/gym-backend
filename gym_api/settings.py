@@ -12,6 +12,9 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-local-key-change-in-p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+# Detectar si estamos en Vercel
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+
 # ALLOWED_HOSTS
 ALLOWED_HOSTS = [
     'localhost',
@@ -41,7 +44,7 @@ INSTALLED_APPS = [
     'entrenadores',
 ]
 
-# Agregar Cloudinary si está configurado
+# Agregar Cloudinary si está configurado en las variables de entorno
 if os.environ.get('CLOUDINARY_CLOUD_NAME'):
     INSTALLED_APPS += [
         'cloudinary',
@@ -82,36 +85,38 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gym_api.wsgi.application'
 
 # ============================================================================
-# BASE DE DATOS - MySQL local / Neon production
+# BASE DE DATOS - MySQL local / Neon (PostgreSQL) en Vercel/Producción
 # ============================================================================
 
-# Por defecto usar MySQL local
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME', default='gym_db'),
-        'USER': config('DB_USER', default='root'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+if IS_VERCEL or config('USE_NEON', default=False, cast=bool):
+    # En Vercel o con USE_NEON activo se usa PostgreSQL de Neon
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('NEON_DATABASE_NAME') or config('NEON_DATABASE_NAME'),
+            'USER': os.environ.get('NEON_DATABASE_USER') or config('NEON_DATABASE_USER'),
+            'PASSWORD': os.environ.get('NEON_DATABASE_PASSWORD') or config('NEON_DATABASE_PASSWORD'),
+            'HOST': os.environ.get('NEON_DATABASE_HOST') or config('NEON_DATABASE_HOST'),
+            'PORT': os.environ.get('NEON_DATABASE_PORT', default='5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
         }
     }
-}
-
-# Si USE_NEON está activo, usar PostgreSQL de Neon
-if config('USE_NEON', default=False, cast=bool):
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('NEON_DATABASE_NAME'),
-        'USER': config('NEON_DATABASE_USER'),
-        'PASSWORD': config('NEON_DATABASE_PASSWORD'),
-        'HOST': config('NEON_DATABASE_HOST'),
-        'PORT': config('NEON_DATABASE_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+else:
+    # Por defecto usar MySQL local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': config('DB_NAME', default='gym_db'),
+            'USER': config('DB_USER', default='root'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='3306'),
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+            }
+        }
     }
 
 # ============================================================================
@@ -149,7 +154,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Si Cloudinary está configurado, usarlo para media files
+# Configuración de Cloudinary si las variables están configuradas
 if os.environ.get('CLOUDINARY_CLOUD_NAME'):
     import cloudinary
     import cloudinary.uploader
@@ -163,7 +168,6 @@ if os.environ.get('CLOUDINARY_CLOUD_NAME'):
     )
     
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    MEDIA_URL = '/media/'  # Cloudinary maneja esto automáticamente
 
 # ============================================================================
 # CONFIGURACIÓN DE DJANGO
@@ -216,21 +220,6 @@ SIMPLE_JWT = {
 # CORS - CONFIGURACIÓN
 # ============================================================================
 
-# En desarrollo, permitir todos los orígenes
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    # En producción, solo permitir orígenes específicos
-    CORS_ALLOWED_ORIGINS = [
-        'http://localhost:5173',
-        'http://localhost:3000',
-    ]
-    
-    # Agregar URL del frontend desde variables de entorno
-    FRONTEND_URL = os.environ.get('FRONTEND_URL')
-    if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
-        CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
-
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
@@ -255,28 +244,46 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
+# Configuración dinámica de orígenes según el entorno
+FRONTEND_URL = os.environ.get('FRONTEND_URL') or config('FRONTEND_URL', default='')
+
+if IS_VERCEL:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [FRONTEND_URL] if FRONTEND_URL else []
+elif DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = []
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+    ]
+    if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+
 # ============================================================================
 # CSRF - CONFIGURACIÓN
 # ============================================================================
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://*.vercel.app',
-]
-
-# Agregar FRONTEND_URL a CSRF si existe
-FRONTEND_URL = os.environ.get('FRONTEND_URL')
-if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
+if IS_VERCEL:
+    CSRF_TRUSTED_ORIGINS = [FRONTEND_URL] if FRONTEND_URL else []
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://*.vercel.app',
+    ]
+    if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
 # ============================================================================
 # SEGURIDAD - PRODUCCIÓN
 # ============================================================================
 
-if not DEBUG:
+if not DEBUG or IS_VERCEL:
     # SSL/HTTPS
-    SECURE_SSL_REDIRECT = False  # Vercel maneja esto
+    SECURE_SSL_REDIRECT = False  # Vercel maneja esto automáticamente por detrás
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
     # Cookies seguras
