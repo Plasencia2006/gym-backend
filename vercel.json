@@ -2,11 +2,22 @@
     "version": 2,
     "builds": [
         {
+            "src": "build.sh",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "staticfiles"
+            }
+        },
+        {
             "src": "api.py",
             "use": "@vercel/python"
         }
     ],
     "routes": [
+        {
+            "src": "/static/(.*)",
+            "dest": "/static/$1"
+        },
         {
             "src": "/(.*)",
             "dest": "api.py"
@@ -16,8 +27,5 @@
         "DJANGO_SETTINGS_MODULE": "gym_api.settings",
         "PYTHONPATH": ".",
         "PIP_BREAK_SYSTEM_PACKAGES": "1"
-    },
-    "build": {
-        "command": "pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
     }
 }

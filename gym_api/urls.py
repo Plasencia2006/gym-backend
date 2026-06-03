@@ -28,7 +28,6 @@ def setup_database(request):
     """
     secret = request.GET.get('secret')
     
-    # Verificar clave secreta
     if secret != 'setup2026':
         return JsonResponse({'error': 'No autorizado'}, status=403)
     
@@ -90,7 +89,7 @@ def setup_database(request):
 
 urlpatterns = [
     path('', home, name='home'),
-    path('setup-db/', setup_database, name='setup_database'),  # ← ¡ESTA LÍNEA ES CRÍTICA!
+    path('setup-db/', setup_database, name='setup_database'),
     path('admin/', admin.site.urls),
     path('api/', include('entrenadores.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
