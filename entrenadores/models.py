@@ -3,30 +3,38 @@ from django.contrib.auth.models import AbstractUser
 import os
 
 class Entrenador(AbstractUser):
-    """Modelo de Entrenador - Superusuario del sistema"""
-    especialidad = models.CharField(max_length=100)
-    telefono = models.CharField(max_length=20)
-    foto = models.ImageField(upload_to='entrenadores/', null=True, blank=True)
-    fecha_registro = models.DateTimeField(auto_now_add=True)
-    is_trainer = models.BooleanField(default=True)
+    """Modelo de usuario personalizado para entrenadores"""
+    email = models.EmailField(unique=True)
+    especialidad = models.CharField(max_length=100, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    foto = models.ImageField(upload_to='entrenadores/', blank=True, null=True)
+    
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    
+    # ✅ AGREGAR ESTO para evitar conflictos
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='entrenador_groups',  # ← CAMBIAR related_name
+        blank=True,
+        verbose_name='groups',
+        help_text='The groups this user belongs to.',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='entrenador_permissions',  # ← CAMBIAR related_name
+        blank=True,
+        verbose_name='user permissions',
+        help_text='Specific permissions for this user.',
+    )
     
     class Meta:
         verbose_name = 'Entrenador'
         verbose_name_plural = 'Entrenadores'
-        ordering = ['first_name', 'last_name']
     
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.especialidad}"
-    
-    def delete(self, *args, **kwargs):
-        # Eliminar foto al borrar el entrenador
-        if self.foto and os.path.isfile(self.foto.path):
-            os.remove(self.foto.path)
-        super().delete(*args, **kwargs)
+        return f"{self.first_name} {self.last_name}"
 
-
-from django.db import models
-from django.conf import settings
 
 class Rutina(models.Model):
     nombre = models.CharField(max_length=200)
@@ -37,21 +45,24 @@ class Rutina(models.Model):
         ('Intermedio', 'Intermedio'),
         ('Avanzado', 'Avanzado'),
     ])
-    
-    # ✅ Imagen opcional
     imagen = models.ImageField(
         upload_to='rutinas/',
         null=True,
         blank=True,
     )
-    
     entrenador = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        'entrenadores.Entrenador',
         on_delete=models.CASCADE,
-        related_name='rutinas'
+        related_name='rutinas',
+        null=True,  # ← AGREGAR ESTO
+        blank=True  # ← AGREGAR ESTO
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)  # ← CAMBIAR
+    fecha_actualizacion = models.DateTimeField(auto_now=True)  # ← CAMBIAR
+    
+    class Meta:
+        verbose_name = 'Rutina'
+        verbose_name_plural = 'Rutinas'
     
     def __str__(self):
         return self.nombre

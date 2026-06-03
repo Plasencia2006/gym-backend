@@ -16,6 +16,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-local-key-change-in-p
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 IS_VERCEL = os.environ.get('VERCEL') == '1'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -121,6 +122,7 @@ USE_I18N = False  # ❌ Desactivar internacionalización
 USE_L10N = False  # ❌ Desactivar localización
 USE_TZ = True
 
+AUTH_USER_MODEL = 'entrenadores.Entrenador'
 # ============================================================================
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # ============================================================================
@@ -254,6 +256,7 @@ else:
     if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
+
 # ============================================================================
 # SEGURIDAD - PRODUCCIÓN
 # ============================================================================
@@ -287,3 +290,7 @@ if not DEBUG or IS_VERCEL:
             },
         },
     }
+# ============================================================================
+# DEFAULT AUTO FIELD
+# ============================================================================
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

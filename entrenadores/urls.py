@@ -1,3 +1,4 @@
+from django.apps import AppConfig
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import EntrenadorViewSet, RutinaViewSet, RegisterView, LoginView
@@ -5,6 +6,10 @@ from .views import EntrenadorViewSet, RutinaViewSet, RegisterView, LoginView
 router = DefaultRouter()
 router.register(r'entrenadores', EntrenadorViewSet, basename='entrenador')
 router.register(r'rutinas', RutinaViewSet, basename='rutina')
+class EntrenadoresConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'entrenadores'
+    verbose_name = 'Entrenadores'
 
 urlpatterns = [
     # Endpoints de autenticación
