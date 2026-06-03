@@ -16,7 +16,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-local-key-change-in-p
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 IS_VERCEL = os.environ.get('VERCEL') == '1'
+
+# ============================================================================
+# CONFIGURACIÓN BÁSICA
+# ============================================================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'entrenadores.Entrenador'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -29,6 +34,9 @@ VERCEL_URL = os.environ.get('VERCEL_URL')
 if VERCEL_URL and VERCEL_URL not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(VERCEL_URL)
 
+# ============================================================================
+# APLICACIONES INSTALADAS
+# ============================================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -116,15 +124,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'en-us'  # Usar inglés (no requiere traducciones)
+# ============================================================================
+# INTERNACIONALIZACIÓN
+# ============================================================================
+LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-USE_I18N = False  # ❌ Desactivar internacionalización
-USE_L10N = False  # ❌ Desactivar localización
+USE_I18N = False
 USE_TZ = True
 
-AUTH_USER_MODEL = 'entrenadores.Entrenador'
 # ============================================================================
-# ARCHIVOS ESTÁTICOS Y MEDIA
+# ARCHIVOS ESTÁTICOS
 # ============================================================================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -134,11 +143,8 @@ if IS_VERCEL:
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
 # ============================================================================
-# CLOUDINARY - Configuración para imágenes en producción
+# CLOUDINARY - CONFIGURACIÓN COMPLETA
 # ============================================================================
 CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
@@ -156,13 +162,28 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
         secure=True
     )
     
-    # ✅ Usar DEFAULT_FILE_STORAGE (compatible con Django 5.0)
+    # ✅ CONFIGURACIÓN CRÍTICA PARA DJANGO 5.0+
+    # Usar STORAGES (nuevo formato) y DEFAULT_FILE_STORAGE (compatibilidad)
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+    
+    # ✅ También mantener DEFAULT_FILE_STORAGE para compatibilidad
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    
     MEDIA_URL = 'media/'
     
     print("✅ Cloudinary configurado correctamente")
+    print(f"   Cloud Name: {CLOUDINARY_CLOUD_NAME}")
 else:
-    print("⚠️ Cloudinary NO configurado - faltan variables de entorno")
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+    print("⚠️ Cloudinary NO configurado - usando almacenamiento local")
 
 # ============================================================================
 # REST FRAMEWORK
@@ -256,7 +277,6 @@ else:
     if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
-
 # ============================================================================
 # SEGURIDAD - PRODUCCIÓN
 # ============================================================================
@@ -290,7 +310,3 @@ if not DEBUG or IS_VERCEL:
             },
         },
     }
-# ============================================================================
-# DEFAULT AUTO FIELD
-# ============================================================================
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
