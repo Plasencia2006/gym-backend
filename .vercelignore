@@ -1,9 +1,52 @@
-venv/
+# Ignorar archivos de localización de Django (causan errores en Vercel)
+**/locale/**
+**/locales/**
+**/LC_MESSAGES/**
+
+# Archivos innecesarios
 __pycache__/
 *.pyc
-.env
-.env.local
-media/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Archivos estáticos y media
+*.log
+local_settings.py
 db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
 .git/
-node_modules/
+.gitignore
+
+# Vercel
+.vercel/
