@@ -2,14 +2,18 @@
     "version": 2,
     "builds": [
         {
-            "src": "gym_api/wsgi.py",
+            "src": "api.py",
             "use": "@vercel/python"
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "gym_api/wsgi.py"
+            "dest": "api.py"
         }
-    ]
+    ],
+    "env": {
+        "DJANGO_SETTINGS_MODULE": "gym_api.settings",
+        "PIP_BREAK_SYSTEM_PACKAGES": "1"
+    }
 }
