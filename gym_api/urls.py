@@ -90,7 +90,7 @@ def setup_database(request):
 
 urlpatterns = [
     path('', home, name='home'),
-    path('setup-db/', setup_database, name='setup_database'),  # ️ TEMPORAL
+    path('setup-db/', setup_database, name='setup_database'),  # ← ¡ESTA LÍNEA ES CRÍTICA!
     path('admin/', admin.site.urls),
     path('api/', include('entrenadores.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
