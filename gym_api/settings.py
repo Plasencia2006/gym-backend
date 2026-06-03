@@ -148,7 +148,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise para servir archivos estáticos en producción
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if IS_VERCEL:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (imágenes)
 MEDIA_URL = '/media/'
@@ -248,8 +251,14 @@ CORS_ALLOW_METHODS = [
 FRONTEND_URL = os.environ.get('FRONTEND_URL') or config('FRONTEND_URL', default='')
 
 if IS_VERCEL:
-    CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = [FRONTEND_URL] if FRONTEND_URL else []
+    # ✅ En Vercel, permitir todos los orígenes temporalmente para pruebas
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = []
+    
+    # Si FRONTEND_URL está definido, agregarlo explícitamente
+    if FRONTEND_URL:
+        CORS_ALLOWED_ORIGINS = [FRONTEND_URL]
+        CORS_ALLOW_ALL_ORIGINS = False
 elif DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOWED_ORIGINS = []
@@ -267,7 +276,14 @@ else:
 # ============================================================================
 
 if IS_VERCEL:
-    CSRF_TRUSTED_ORIGINS = [FRONTEND_URL] if FRONTEND_URL else []
+    # ✅ En Vercel, permitir todos los orígenes de Vercel
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.vercel.app',
+        'https://gym-backend-indol.vercel.app',  # Tu URL específica
+    ]
+    if FRONTEND_URL:
+        if FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 else:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:5173',

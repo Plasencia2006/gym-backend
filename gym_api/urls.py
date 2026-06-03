@@ -8,38 +8,22 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-
 def home(request):
     """Ruta raíz - Health Check"""
     return JsonResponse({
         'status': 'ok',
-        'message': 'Gym Management API v1.0',
-        'deployed': True,
-        'endpoints': {
-            'admin': '/admin/',
-            'api': '/api/',
-            'entrenadores': '/api/entrenadores/',
-            'rutinas': '/api/rutinas/',
-            'login': '/api/entrenadores/login/',
-            'register': '/api/entrenadores/register/',
-        }
+        'message': 'Gym Management API',
+        'version': '1.0.0'
     })
 
-
 urlpatterns = [
-    # ✅ RUTA RAÍZ - Necesaria para Vercel
-    path('', home, name='home'),
-    
-    # Admin
+    path('', home, name='home'),  # ✅ ESTA LÍNEA ES CRÍTICA
     path('admin/', admin.site.urls),
-    
-    # API
     path('api/', include('entrenadores.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
 
-# Servir media files en desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
