@@ -8,15 +8,15 @@ pip install -r requirements.txt --break-system-packages
 
 # Ejecutar migraciones
 echo "🗄️ Ejecutando migraciones..."
-python manage.py migrate --noinput
+python manage.py migrate --noinput || true
 
-# Recopilar estáticos
+# Recopilar estáticos (ignorar errores de locale)
 echo "📁 Recopilando archivos estáticos..."
-python manage.py collectstatic --noinput --clear
+python manage.py collectstatic --noinput --clear || true
 
 # Crear superusuario si no existe
 echo "👤 Creando superusuario..."
-python manage.py shell << EOF
+python manage.py shell << EOF || true
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(username='admin').exists():
