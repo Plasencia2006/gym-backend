@@ -64,16 +64,6 @@ class RutinaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre', 'descripcion', 'duracion', 'nivel', 
                   'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
         read_only_fields = ['entrenador']
-        
-        # ✅ HACER IMAGEN OPCIONAL
-        extra_kwargs = {
-            'imagen': {
-                'required': False,
-                'allow_null': True,
-                'allow_blank': True
-            }
-        }
     
     def create(self, validated_data):
-        # Si no hay imagen, validated_data['imagen'] será None
         return Rutina.objects.create(**validated_data)

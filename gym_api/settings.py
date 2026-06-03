@@ -48,9 +48,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    # Cloudinary
-    'cloudinary',
-    'cloudinary_storage',
     # Local
     'entrenadores',
 ]
@@ -143,47 +140,8 @@ if IS_VERCEL:
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ============================================================================
-# CLOUDINARY - CONFIGURACIÓN COMPLETA
-# ============================================================================
-CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
-CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
-CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
-
-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
-    import cloudinary
-    import cloudinary.uploader
-    import cloudinary.api
-    
-    cloudinary.config(
-        cloud_name=CLOUDINARY_CLOUD_NAME,
-        api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET,
-        secure=True
-    )
-    
-    # ✅ CONFIGURACIÓN CRÍTICA PARA DJANGO 5.0+
-    # Usar STORAGES (nuevo formato) y DEFAULT_FILE_STORAGE (compatibilidad)
-    STORAGES = {
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-        },
-    }
-    
-    # ✅ También mantener DEFAULT_FILE_STORAGE para compatibilidad
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    
-    MEDIA_URL = 'media/'
-    
-    print("✅ Cloudinary configurado correctamente")
-    print(f"   Cloud Name: {CLOUDINARY_CLOUD_NAME}")
-else:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
-    print("⚠️ Cloudinary NO configurado - usando almacenamiento local")
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # ============================================================================
 # REST FRAMEWORK

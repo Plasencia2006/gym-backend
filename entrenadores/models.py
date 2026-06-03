@@ -44,8 +44,7 @@ class Rutina(models.Model):
         ('Intermedio', 'Intermedio'),
         ('Avanzado', 'Avanzado'),
     ])
-    
-    # ❌ ELIMINADO: campo imagen
+    # ❌ SIN campo imagen
     
     entrenador = models.ForeignKey(
         'entrenadores.Entrenador',
