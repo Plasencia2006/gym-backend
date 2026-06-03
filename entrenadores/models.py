@@ -25,38 +25,37 @@ class Entrenador(AbstractUser):
         super().delete(*args, **kwargs)
 
 
+from django.db import models
+from django.conf import settings
+
 class Rutina(models.Model):
-    """Modelo de Rutina - Relacionado con Entrenador"""
-    NIVEL_CHOICES = [
-        ('principiante', 'Principiante'),
-        ('intermedio', 'Intermedio'),
-        ('avanzado', 'Avanzado'),
-    ]
-    
-    nombre = models.CharField(max_length=100)
-    duracion = models.IntegerField(help_text="Duración en minutos")
-    nivel = models.CharField(max_length=20, choices=NIVEL_CHOICES)
+    nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
-    imagen = models.ImageField(upload_to='rutinas/', null=True, blank=True)
-    entrenador = models.ForeignKey(
-        Entrenador, 
-        on_delete=models.CASCADE, 
-        related_name='rutinas',
-        null=True
+    duracion = models.IntegerField(help_text='Duración en minutos')
+    nivel = models.CharField(max_length=50, choices=[
+        ('Principiante', 'Principiante'),
+        ('Intermedio', 'Intermedio'),
+        ('Avanzado', 'Avanzado'),
+    ])
+    
+    # ✅ CAMPO IMAGEN - Debe tener null=True y blank=True
+    imagen = models.ImageField(
+        upload_to='rutinas/',
+        null=True,           # ← IMPORTANTE
+        blank=True,          # ← IMPORTANTE
     )
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    entrenador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='rutinas'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = 'Rutina'
         verbose_name_plural = 'Rutinas'
-        ordering = ['-fecha_creacion']
     
     def __str__(self):
-        return f"{self.nombre} - {self.nivel}"
-    
-    def delete(self, *args, **kwargs):
-        # Eliminar imagen al borrar la rutina
-        if self.imagen and os.path.isfile(self.imagen.path):
-            os.remove(self.imagen.path)
-        super().delete(*args, **kwargs)
+        return self.nombre

@@ -62,13 +62,19 @@ class RutinaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre', 'descripcion', 'duracion', 'nivel', 
                   'imagen', 'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
         read_only_fields = ['entrenador']
+        
+        # ✅ HACER IMAGEN OPCIONAL
         extra_kwargs = {
-            'imagen': {'required': False}  # ✅ Imagen NO requerida
+            'imagen': {
+                'required': False,    # ← NO requerida
+                'allow_null': True,   # ← Permitir NULL
+                'allow_blank': True   # ← Permitir vacío
+            }
         }
     
     def validate_imagen(self, value):
         """Validar imagen - permitir None"""
-        if value is None:
+        if value is None or value == '':
             return None
         if value:
             max_size = 5 * 1024 * 1024  # 5MB
