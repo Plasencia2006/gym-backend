@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
+        # Cloudinary
+    'cloudinary',
+    'cloudinary_storage',
+    
     'corsheaders',
     # Local
     'entrenadores',
@@ -157,20 +161,27 @@ else:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Configuración de Cloudinary si las variables están configuradas
-if os.environ.get('CLOUDINARY_CLOUD_NAME'):
+# ============================================================================
+# CLOUDINARY - Configuración para imágenes en producción
+# ============================================================================
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
+
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
     import cloudinary
     import cloudinary.uploader
     import cloudinary.api
     
     cloudinary.config(
-        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-        api_key=os.environ.get('CLOUDINARY_API_KEY'),
-        api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
         secure=True
     )
     
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    print("✅ Cloudinary configurado correctamente")
 
 # ============================================================================
 # CONFIGURACIÓN DE DJANGO
@@ -367,3 +378,4 @@ if IS_VERCEL:
             },
         },
     }
+    
