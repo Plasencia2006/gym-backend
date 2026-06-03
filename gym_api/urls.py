@@ -86,12 +86,32 @@ def setup_database(request):
     except Exception as e:
         error_output = traceback.format_exc()
         return HttpResponse(f"❌ Error:\n{error_output}")
+    
+@csrf_exempt
+def test_cloudinary(request):
+    """Probar conexión con Cloudinary"""
+    try:
+        # Verificar configuración
+        config = cloudinary.config()
+        
+        return JsonResponse({
+            'status': 'ok',
+            'cloud_name': config.cloud_name,
+            'api_key': config.api_key[:5] + '...' if config.api_key else 'NO CONFIGURADO',
+            'api_secret': 'CONFIGURADO' if config.api_secret else 'NO CONFIGURADO',
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 urlpatterns = [
     path('', home, name='home'),
     path('setup-db/', setup_database, name='setup_database'),
     path('admin/', admin.site.urls),
     path('api/', include('entrenadores.urls')),
+    path('test-cloudinary/', test_cloudinary, name='test_cloudinary'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
