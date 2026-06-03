@@ -47,8 +47,8 @@ class Rutina(models.Model):
     ])
     imagen = models.ImageField(
         upload_to='rutinas/',
-        null=True,
-        blank=True,
+        null=True,        # ← ESTO
+        blank=True,       # ← ESTO
     )
     entrenador = models.ForeignKey(
         'entrenadores.Entrenador',

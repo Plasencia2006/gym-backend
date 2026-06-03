@@ -62,28 +62,7 @@ class RutinaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre', 'descripcion', 'duracion', 'nivel', 
                   'imagen', 'entrenador', 'entrenador_nombre', 'created_at', 'updated_at']
         read_only_fields = ['entrenador']
-        
-        # ✅ HACER IMAGEN OPCIONAL
-        extra_kwargs = {
-            'imagen': {
-                'required': False,
-                'allow_null': True,
-                'allow_blank': True
-            }
-        }
-    
-    def validate_imagen(self, value):
-        """Validar imagen - permitir None"""
-        if value is None or value == '':
-            return None
-        
-        # Validar tamaño máximo (5MB)
-        max_size = 5 * 1024 * 1024
-        if hasattr(value, 'size') and value.size > max_size:
-            raise serializers.ValidationError("La imagen no puede superar 5MB")
-        
-        return value
     
     def create(self, validated_data):
-        print(f"Creando rutina: {validated_data}")
+        # Si no hay imagen, crear sin ella
         return Rutina.objects.create(**validated_data)
