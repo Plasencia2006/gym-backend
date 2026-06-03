@@ -38,11 +38,11 @@ class Rutina(models.Model):
         ('Avanzado', 'Avanzado'),
     ])
     
-    # ✅ CAMPO IMAGEN - Debe tener null=True y blank=True
+    # ✅ Imagen opcional
     imagen = models.ImageField(
         upload_to='rutinas/',
-        null=True,           # ← IMPORTANTE
-        blank=True,          # ← IMPORTANTE
+        null=True,
+        blank=True,
     )
     
     entrenador = models.ForeignKey(
@@ -52,10 +52,6 @@ class Rutina(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = 'Rutina'
-        verbose_name_plural = 'Rutinas'
     
     def __str__(self):
         return self.nombre
