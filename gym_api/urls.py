@@ -7,6 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.management import call_command
 import io
 import traceback
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import cloudinary
+
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
@@ -19,6 +23,25 @@ def home(request):
         'message': 'Gym Management API',
         'version': '1.0.0'
     })
+    
+# Agregar esta función
+@csrf_exempt
+def test_cloudinary(request):
+    """Probar conexión con Cloudinary"""
+    try:
+        config = cloudinary.config()
+        
+        return JsonResponse({
+            'status': 'ok',
+            'cloud_name': config.cloud_name,
+            'api_key': config.api_key[:5] + '...' if config.api_key else 'NO CONFIGURADO',
+            'api_secret': 'CONFIGURADO' if config.api_secret else 'NO CONFIGURADO',
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 @csrf_exempt
 def setup_database(request):

@@ -155,9 +155,9 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
     )
     
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'entrenadores.Entrenador'
+    print("✅ Cloudinary configurado correctamente")
+else:
+    print("⚠️ Cloudinary NO configurado - faltan variables de entorno")
 
 # ============================================================================
 # REST FRAMEWORK
