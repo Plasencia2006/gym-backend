@@ -14,6 +14,7 @@
     ],
     "env": {
         "DJANGO_SETTINGS_MODULE": "gym_api.settings",
+        "PYTHONPATH": ".",
         "PIP_BREAK_SYSTEM_PACKAGES": "1"
     }
 }

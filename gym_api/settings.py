@@ -337,3 +337,33 @@ if not DEBUG or IS_VERCEL:
             },
         },
     }
+    
+# ============================================================================
+# CONFIGURACIÓN ESPECÍFICA PARA VERCEL
+# ============================================================================
+
+if IS_VERCEL:
+    # Forzar que Django sepa que está en Vercel
+    ALLOWED_HOSTS += ['gym-backend-indol.vercel.app']
+    
+    # Logging para debug
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+        },
+    }

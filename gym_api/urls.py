@@ -2,22 +2,29 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
 
 def home(request):
-    """Ruta raíz - Health Check"""
+    """Health check - Ruta raíz"""
     return JsonResponse({
         'status': 'ok',
-        'message': 'Gym Management API',
-        'version': '1.0.0'
+        'message': 'Gym Management API v1.0',
+        'deployed': True,
+        'endpoints': {
+            'admin': '/admin/',
+            'api': '/api/',
+            'login': '/api/entrenadores/login/',
+            'register': '/api/entrenadores/register/',
+            'rutinas': '/api/rutinas/',
+        }
     })
 
 urlpatterns = [
-    path('', home, name='home'),  # ✅ ESTA LÍNEA ES CRÍTICA
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('api/', include('entrenadores.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
